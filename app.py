@@ -2,22 +2,23 @@ import plotly.express as px
 from math import nan, isnan
 import streamlit as st
 import pandas as pd
+import httpx
 import json
-import requests
-
 
 url_api = 'https://www.colegioetapa.com.br/ar-colegio-app-backend/v1'
 url_login = url_api + '/login/aluno'
 url_data = url_api + '/provas/notas?grau={}&local={}&matricula={}&serie={}&unidade={}'
 
+client = httpx.Client(http2=True)
 
-@st.cache(allow_output_mutation=True)
+
+@st.cache
 def load_data(user):
-  data = requests.get(url_data.format(user['grau'], user['local'], user['matricula'], user['serie'], user['unidade']),
-                      headers={'Auth-Token': user['token'] + ':' + user['matricula']})
+  data = client.get(url_data.format(user['grau'], user['local'], user['matricula'], user['serie'], user['unidade']),
+                    headers={'Auth-Token': user['token'] + ':' + user['matricula']})
   data = json.loads(data.content.decode('utf-8'))['prvNotas']
-  df = pd.DataFrame(data)
 
+  df = pd.DataFrame(data)
   df = df.drop(['class1', 'class2', 'class3', 'class4',
                 'link1', 'link2', 'link3', 'link4'], axis=1)
   df = df.rename({'materia': 'Matéria', 'celula': 'Código',
@@ -52,7 +53,7 @@ def run():
 
   st.title('Conjuntos')
   st.write(means.transpose())
-  st.write(px.line(means, y='Média', range_y=[0, 10]))
+  st.write(px.line(means, y='Média',  markers=True, range_y=[0, 10]))
 
   st.title('Matérias')
   st.write(px.bar(df[['Código', 'Média']].sort_values('Média'),
@@ -76,8 +77,8 @@ with st.form('auth_form'):
   submit = st.form_submit_button('Carregar')
 
   if submit:
-    data = requests.post(
-        url_login, data={'matricula': username, 'senha': password})
+    data = client.post(url_login,
+                       data={'matricula': username, 'senha': password})
     data = json.loads(data.content.decode('utf-8'))
     if 'body' in data.keys():
       st.session_state['user'] = data['body']

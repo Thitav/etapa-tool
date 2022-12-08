@@ -29,7 +29,6 @@ def load_data(user):
       'Conjunto 1', 'Conjunto 2', 'Conjunto 3', 'Conjunto 4']].astype(float)
   df['Média'] = df[['Conjunto 1', 'Conjunto 2',
                     'Conjunto 3', 'Conjunto 4']].mean(axis=1)
-  df[['Conjunto 1', 'Conjunto 2', 'Conjunto 3', 'Conjunto 4']].mean(axis=0)
 
   mean = []
   for i in df:

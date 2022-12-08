@@ -11,7 +11,7 @@ url_login = url_api + '/login/aluno'
 url_data = url_api + '/provas/notas?grau={}&local={}&matricula={}&serie={}&unidade={}'
 
 
-@st.cache
+@st.cache(allow_output_mutation=True)
 def load_data(user):
   data = requests.get(url_data.format(user['grau'], user['local'], user['matricula'], user['serie'], user['unidade']),
                       headers={'Auth-Token': user['token'] + ':' + user['matricula']})

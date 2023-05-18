@@ -68,23 +68,28 @@ def run():
     df, means, mean = load_data(st.session_state["user"])
 
     st.title("Notas")
-    st.write(df)
+    st.dataframe(df)
     st.write("Média geral:")
     st.write(mean)
 
     st.title("Conjuntos")
-    st.write(means.transpose())
-    st.write(px.line(means, y="Média", markers=True, range_y=[0, 10]))
+    st.dataframe(means.transpose())
+    st.plotly_chart(
+        px.line(means, y="Média", markers=True, range_y=[0, 10]),
+        use_container_width=True,
+    )
 
     st.title("Matérias")
-    st.write(
+    st.plotly_chart(
         px.bar(
             df[["Código", "Média"]].sort_values("Média"),
             x="Código",
             y="Média",
             range_y=[0, 10],
-        )
+        ),
+        use_container_width=True,
     )
+
     code = st.selectbox("Código", df["Código"])
     submit = st.button("Gerar")
 
@@ -96,10 +101,11 @@ def run():
         data = pd.DataFrame(
             {"Conjunto": [f"Conjunto {i+1}" for i in range(len(data))], "Nota": data}
         )
-        st.write(
+        st.plotly_chart(
             px.line(
                 data, x="Conjunto", y="Nota", title=code, markers=True, range_y=[0, 10]
-            )
+            ),
+            use_container_width=True,
         )
 
 

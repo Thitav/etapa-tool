@@ -1,11 +1,11 @@
 import json
+from numpy import isnan
 from math import nan
 import httpx
 import pandas as pd
 import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
 from st_pages import show_pages_from_config, hide_pages
-
 
 URL_API = "https://www.colegioetapa.com.br/ar-colegio-app-backend/v1"
 PATH_LOGIN = "/login/aluno"
@@ -53,11 +53,11 @@ def load_user_data(user):
         axis=1,
     )
     data = data.rename(
-        {"celula": "Código", "conj1": 1, "conj2": 2, "conj3": 3, "conj4": 4}, axis=1
+        {"celula": "Código", "conj1": 0, "conj2": 1, "conj3": 2, "conj4": 3}, axis=1
     )
     data = data.replace({"---": nan, "F*": nan, "F**": nan})
     data = data.set_index("Código")
-    data = data.astype(float)
+    data = data.astype(float).transpose()
 
     return data
 
@@ -79,10 +79,19 @@ with st.form("auth_form"):
             http_client.headers[
                 "Auth-Token"
             ] = f"{user_data['body']['token']}:{username}"
-            st.session_state["http_client"] = http_client
 
             user = user_data["body"]
-            user["notas"] = load_user_data(user)
+            user_data = load_user_data(user)
+
+            user_mean = user_data.to_numpy().flatten()
+            user_mean = user_mean[~isnan(user_mean)].mean()
+
+            user["data"] = {
+                "dataframe": user_data,
+                "mean": user_mean,
+                "row_mean": user_data.mean(axis=1),
+                "column_mean": user_data.mean(),
+            }
             st.session_state["user"] = user
 
             switch_page("Pessoal")

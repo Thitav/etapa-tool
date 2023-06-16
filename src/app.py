@@ -1,4 +1,3 @@
-from numpy import isnan
 import plotly.express as px
 import streamlit as st
 import pandas as pd
@@ -8,92 +7,46 @@ from streamlit_extras.switch_page_button import switch_page
 show_pages_from_config()
 hide_pages(["Login"])
 
-if "user" in st.session_state:
-    user = st.session_state["user"]
-    http_client = st.session_state["http_client"]
-else:
+if "user" not in st.session_state:
     switch_page("login")
 
-user_data: pd.DataFrame = st.session_state["user"]["notas"]
+user_data = st.session_state["user"]["data"]
 
-mean = user_data.to_numpy().flatten()
-mean = mean[~isnan(mean)].mean()
-
-means = user_data.mean()
+user_dataframe: pd.DataFrame = user_data["dataframe"].rename(
+    {0: "Conjunto 1", 1: "Conjunto 2", 2: "Conjunto 3", 3: "Conjunto 4"}
+)
+user_dataframe.index.name = "Conjunto"
+row_mean: pd.Series = (
+    user_data["row_mean"]
+    .rename("Média")
+    .rename({0: "Conjunto 1", 1: "Conjunto 2", 2: "Conjunto 3", 3: "Conjunto 4"})
+)
+row_mean.index.name = "Conjunto"
+column_mean: pd.Series = user_data["column_mean"].rename("Média")
+user_mean: float = user_data["mean"]
 
 st.title("Análise Pessoal")
-st.metric("Média:", round(mean, 2))
-st.title("Notas")
-st.dataframe(
-    user_data.rename(
-        columns={1: "Conjunto 1", 2: "Conjunto 2", 3: "Conjunto 3", 4: "Conjunto 4"}
-    )
-)
 
-st.title("Conjuntos")
-st.dataframe(
-    means.rename("Média").rename(
-        {
-            1: "Conjunto 1",
-            2: "Conjunto 2",
-            3: "Conjunto 3",
-            4: "Conjunto 4",
-        }
-    )
-)
-st.plotly_chart(
-    px.line(
-        means.rename(
-            {
-                1: "Conjunto 1",
-                2: "Conjunto 2",
-                3: "Conjunto 3",
-                4: "Conjunto 4",
-            }
-        ),
-        y=0,
-        range_y=[0, 10],
-        markers=True,
-        labels={"0": "Média", "index": "Conjunto"},
-    ),
+st.metric("Média:", round(user_mean, 2))
+
+tab_dataframe, tab_row, tab_column = st.tabs(["Notas", "Conjuntos", "Matérias"])
+
+tab_dataframe.dataframe(user_dataframe.transpose(), use_container_width=True)
+
+tab_row.dataframe(row_mean.to_frame().transpose(), use_container_width=True)
+tab_row.plotly_chart(
+    px.line(row_mean, y="Média", range_y=[0, 10], markers=True),
     use_container_width=True,
 )
 
-
-st.title("Matérias")
-st.plotly_chart(
-    px.bar(
-        user_data.mean(axis=1).sort_values(),
-        y=0,
-        range_y=[0, 10],
-        labels={
-            "value": "Média",
-        },
-    ),
+tab_column.dataframe(column_mean.sort_values(ascending=False), use_container_width=True)
+tab_column.plotly_chart(
+    px.bar(column_mean.sort_values(), y="Média", range_y=[0, 10]),
     use_container_width=True,
 )
 
-column = st.selectbox("Código", user_data.index)
-
+column = st.selectbox("Código", user_dataframe.columns)
 st.plotly_chart(
-    px.line(
-        user_data.transpose()[column]
-        .rename(
-            {
-                0: "Conjunto 1",
-                1: "Conjunto 2",
-                2: "Conjunto 3",
-                3: "Conjunto 4",
-            },
-        )
-        .dropna(),
-        y=column,
-        range_y=[0, 10],
-        markers=True,
-        labels={
-            "value": "Nota",
-            "index": "Conjunto",
-        },
-    ),
+    px.line(user_dataframe[column].dropna(), y=column, range_y=[0, 10], markers=True),
     use_container_width=True,
 )

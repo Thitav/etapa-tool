@@ -21,7 +21,7 @@ def get_mongo_client() -> MongoClient:
 mongo_client = get_mongo_client()
 
 
-@st.cache_data
+@st.cache_data(ttl=600)
 def load_global_data() -> pd.DataFrame:
     col = mongo_client.etapatool.alunos
     data = col.find({}, {"notas": True, "_id": False})
@@ -44,7 +44,6 @@ global_mean = cast(float, pd.concat([*global_data.to_numpy().flatten()]).mean())
 
 st.title("Análise Geral")
 
-st.header("Médias")
 col_global_mean, col_user_mean = st.columns(2)
 with col_global_mean:
     st.metric("Média do ano", round(global_mean, 2))
@@ -86,3 +85,4 @@ st.plotly_chart(
     ),
     use_container_width=True,
 )
+st.caption(f"Desvio padrão: {round(global_data[column][index].std(), 2)}")

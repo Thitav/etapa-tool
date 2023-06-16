@@ -11,7 +11,6 @@ if "user" not in st.session_state:
     switch_page("login")
 
 user_data = st.session_state["user"]["data"]
-
 user_dataframe: pd.DataFrame = user_data["dataframe"].rename(
     {0: "Conjunto 1", 1: "Conjunto 2", 2: "Conjunto 3", 3: "Conjunto 4"}
 )
@@ -45,8 +44,13 @@ tab_column.plotly_chart(
     use_container_width=True,
 )
 
-column = st.selectbox("Código", user_dataframe.columns)
-st.plotly_chart(
-    px.line(user_dataframe[column].dropna(), y=column, range_y=[0, 10], markers=True),
+select_column = tab_column.selectbox("Código", user_dataframe.columns)
+tab_column.plotly_chart(
+    px.line(
+        user_dataframe[select_column].dropna(),
+        y=select_column,
+        range_y=[0, 10],
+        markers=True,
+    ),
     use_container_width=True,
 )

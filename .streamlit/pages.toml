@@ -1,0 +1,11 @@
+[[pages]]
+path = "src/app.py"
+name = "Pessoal"
+
+[[pages]]
+path = "src/pages/analysis.py"
+name = "Geral"
+
+[[pages]]
+path = "src/pages/login.py"
+name = "Login"

@@ -20,7 +20,6 @@ res = json.loads(res.content.decode("utf-8"))["body"]
 http_client.headers["Auth-Token"] = f"{res['token']}:{res['matricula']}"
 
 users = col.find({})
-
 for user in users:
     print(f"[+] Updating data for user {user['matricula']}...")
 
@@ -48,5 +47,5 @@ for user in users:
     for i in user_data:
         user_data[i] = list(user_data[i].values())
 
-    col.update_one({"_id": user["_id"]}, {"notas": user_data})
+    col.update_one({"_id": user["_id"]}, {"$set": {"notas": user_data}})
     print(f"[+] Updated data for user {user['matricula']}")

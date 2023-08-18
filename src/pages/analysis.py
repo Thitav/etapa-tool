@@ -1,5 +1,6 @@
 from typing import cast
 import pandas as pd
+from numpy import nan
 import streamlit as st
 import plotly.express as px
 from pymongo import MongoClient
@@ -21,16 +22,19 @@ def get_mongo_client() -> MongoClient:
 mongo_client = get_mongo_client()
 
 
-@st.cache_data(ttl=600)
+@st.cache_data
 def load_global_data() -> pd.DataFrame:
     col = mongo_client.etapatool.alunos
     data = col.find({}, {"notas": True, "_id": False})
-
     data = pd.DataFrame([i["notas"] for i in data])
+
     data = pd.DataFrame(
-        [[pd.Series(value) for value in zip(*data[column])] for column in data],
-        index=data.columns,
-    ).transpose()
+        [
+            [pd.Series(value) for value in zip(*list(data[column].apply(lambda x: [nan]*4 if isinstance(x, float) else x)))] 
+            for column in data
+        ],
+         index=data.columns,
+     ).transpose()
 
     return data
 

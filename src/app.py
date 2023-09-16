@@ -40,12 +40,15 @@ def app() -> None:
     with tab_means:
         global_means = (
             global_data.get_users_attr("filtered_mean")
-            .sort_values(ignore_index=True)
             .dropna()
-            .drop_duplicates()
+            .sort_values(ignore_index=True)
         )
 
-        rankmetric(user_data.filtered_mean, global_data.filtered_mean, global_means)
+        rankmetric(
+            user_data.filtered_mean,
+            global_data.filtered_mean,
+            global_means.drop_duplicates(),
+        )
         distplot(global_means, 10, "Alunos", "Média")
     with tab_row:
         lineplot(

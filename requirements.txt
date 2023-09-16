@@ -1,10 +1,9 @@
 h2==4.1.0
-httpx==0.24.1
+httpx==0.25.0
 numpy==1.24.3
 pandas==1.5.2
 altair==4.2.0
 plotly==5.11.0
 pymongo==4.3.3
-st_pages==0.4.1
-streamlit==1.22.0
-streamlit_extras==0.2.7
+scipy==1.11.2
+streamlit==1.26.0

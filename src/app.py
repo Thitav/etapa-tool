@@ -52,7 +52,7 @@ def app() -> None:
         distplot(global_means, 10, "Alunos", "Média")
     with tab_row:
         lineplot(
-            global_data.filtered_row_mean.rename(lambda n: f"Conjunto {n+1}"),
+            user_data.filtered_row_mean.rename(lambda n: f"Conjunto {n+1}"),
             xtitle="Conjunto",
             ytitle="Média",
             pct_change=True,
